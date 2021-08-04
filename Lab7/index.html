@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset=utf-8 />
+    <meta name="description" content="A simple tool for planning rooms in RimWorld. Click and drag to lay out rooms horizontally or vertically." />
+    <title>RimWorld Room Planner</title>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <script ></script>
+</head>
+
+<body>
+    <canvas height="600" width="600"></canvas>
+    <div id="sidePanel">
+        <button id="optionsButton">Options</button>
+        <p class="helpText">(Click to toggle options)</p>
+        <div id="optionsDiv">
+            <div id="shapeRow" class="optionRow">
+                <form>
+                    <label id="rectangularRadioLabel" class="switch">
+                        <input id="rectangularRadioButton" type="radio" name="shape" value="rectangular" checked="checked"> Rectangular
+                    </label>
+                    <br />
+                    <label id="circularRadioLabel" class="switch">
+                        <input id="circularRadioButton" type="radio" name="shape" value="circular"> Circular (unfinished)
+                    </label>
+                </form>
+            </div>
+           
+        </div>
+    </div>
+    <script>
+        var canvas = document.getElementsByTagName('canvas')[0];
+        var body = document.getElementsByTagName('body')[0];
+
+        var pressX = 0;
+        var pressY = 0;
+
+        var isPressed = false;
+        var currentMouseX = 0;
+        var currentMouseY = 0;
+        var releaseX = 0;
+        var releaseY = 0;
+        var drawRoom = false;
+        var isRectangular = true;
+
+        // Rectangular options
+        var roomSize = 3;
+        var hasSquareRooms = false;
+
+        var ctx = canvas.getContext('2d');
+        if (ctx) {
+            setupEvents();
+            draw();
+        }
+
+
+        var optionsButton = document.getElementById("optionsButton");
+        var optionsDiv = document.getElementById("optionsDiv");
+
+        // свертка/открытие Options
+        optionsButton.onmousedown = function() {
+            optionsDiv.style.display = optionsDiv.style.display === "none" ? "block" : "none";
+        }
+
+        document.getElementById("rectangularRadioLabel").onclick = function() {
+            isRectangular = true;
+            document.getElementById("rectangularOptionsDiv").style.display = "block";
+            document.getElementById("circularOptionsDiv").style.display = "none";
+            draw();
+        }
+
+        document.getElementById("circularRadioLabel").onclick = function() {
+            isRectangular = false;
+            document.getElementById("rectangularOptionsDiv").style.display = "none";
+            document.getElementById("circularOptionsDiv").style.display = "block";
+            draw();
+        }
+
+        // Заполнение экрана холстом.
+        window.onload = function() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        // Для получения позиции на холсте
+        function getMousePos(canvas, clientX, clientY) {
+            var rect = canvas.getBoundingClientRect(),  // размер элемента относительно окна
+                scaleX = canvas.width / rect.width,     // растровое изображение отношения по сравнению с элементом для X
+                scaleY = canvas.height / rect.height;   // растровое изображение отношения по сравнению с элементом для Y
+
+            return {
+                // масштабировать координаты мыши после того, как они были настроены относительно элемента
+                x: (clientX - rect.left) * scaleX, 
+                y: (clientY - rect.top) * scaleY 
+            }
+        }
+
+        // Обработка взаимодействия пользователя с холстом.
+        function setupEvents() {
+            function handleMouseDown(clientX, clientY, button) {
+                if (button === undefined)
+                    button = 0;
+
+                if (button === 0) {
+                    isPressed = true;
+                    drawRoom = true;
+                    var mousePos = getMousePos(canvas, clientX, clientY);
+                    pressX = mousePos.x;
+                    pressY = mousePos.y;
+                } else {
+                    isPressed = false;
+                    drawRoom = false;
+
+                    draw();
+                }
+            }
+
+            function handleMouseMove(clientX, clientY) {
+                var mousePos = getMousePos(canvas, clientX, clientY);
+                currentMouseX = mousePos.x;
+                currentMouseY = mousePos.y;
+
+                draw();
+            }
+
+            function handleMouseUp(clientX, clientY) {
+                currentMouseX = -1;
+                currentMouseY = -1;
+                var mousePos = getMousePos(canvas, clientX, clientY);
+                releaseX = mousePos.x;
+                releaseY = mousePos.y;
+                isPressed = false;
+
+                draw();
+            }
+
+            canvas.onmousedown = function(event) {
+                handleMouseDown(event.clientX, event.clientY);
+            };
+
+            canvas.onmousemove = function(event) {
+                handleMouseMove(event.clientX, event.clientY);
+            };
+
+            canvas.onmouseup = function(event) {
+                handleMouseUp(event.clientX, event.clientY);
+            };
+
+            function handleTouchStart(event) {
+                event.preventDefault();
+                handleMouseDown(event.touches[0].clientX, event.touches[0].clientY);
+            }
+
+            function handleTouchMove(event) {
+                event.preventDefault();
+                handleMouseMove(event.touches[0].clientX, event.touches[0].clientY);
+            }
+
+            function handleTouchEnd(event) {
+                event.preventDefault();
+                handleMouseUp(event.changedTouches[0].clientX, event.changedTouches[0].clientY);
+            }
+
+            canvas.addEventListener("touchstart", handleTouchStart, false);
+            canvas.addEventListener("touchmove", handleTouchMove, false);
+            canvas.addEventListener("touchend", handleTouchEnd, false);
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (!drawRoom)
+                return;
+
+            // размеронсть помещения
+            var tileWidth = 20;
+            var tileHeight = 20;
+
+            // начало отрисовки области помещения
+            var areaX = pressX; 
+            var areaY = pressY;
+
+            // конец отрисовки области помещения
+            var areaWidth = (isPressed ? currentMouseX : releaseX) - pressX;
+            var areaHeight = (isPressed ? currentMouseY : releaseY) - pressY;
+
+            if (!isRectangular) {
+                // Если помещение круглое, то выбираем наименьшее
+                areaWidth = Math.min(areaWidth, areaHeight);
+                areaHeight = areaWidth;
+            }
+            
+            // Определяем максимальное кол-во плиток
+            var tilesWide = Math.max(1, Math.ceil(areaWidth / tileWidth));
+            var tilesHigh = Math.max(1, Math.ceil(areaHeight / tileHeight));
+
+            // Определяем максимальнное кол-во плиток внутри помещения
+            var innerTilesWide = Math.max(0, tilesWide - 2);
+            var innerTilesHigh = Math.max(0, tilesHigh - 2);
+
+            var wallColour = "#aa3333";
+            ctx.strokeStyle = "black";
+
+            if (isRectangular) {
+                // Рисуем прямоуголную область
+                for (var row = 0; row < tilesHigh; ++row) {
+                    for (var column = 0; column < tilesWide; ++column) {
+                        var isEdge = (column == 0 || column == tilesWide - 1 || row == 0 || row == tilesHigh - 1);
+                        if (isEdge)
+                            ctx.fillStyle = wallColour;
+                        else {
+                            ctx.fillStyle = "#222222";
+                        }
+                        ctx.fillRect(areaX + (column * tileWidth), areaY + (row * tileHeight), tileWidth, tileHeight);
+                        ctx.strokeRect(areaX + (column * tileWidth), areaY + (row * tileHeight), tileWidth, tileHeight);
+                    }
+                }
+            } else {
+                // Отрисовка круглой области
+                function distance(p1, p2) {
+                    dx = p2.x - p1.x; dx *= dx;
+                    dy = p2.y - p1.y; dy *= dy;
+                    return Math.sqrt(dx + dy);
+                }
+
+                var radius = tilesWide / 2;
+                var x = 0;
+                var y = 0;
+                
+                for (var j = x - radius; j <= x + radius; j++) {
+                    for (var k = y - radius; k <= y + radius; k++) {
+                        if (distance({ x: j, y: k }, { x: x, y: y}) <= radius) {
+                            var row = k;
+                            var column = j;
+
+                            ctx.fillStyle = wallColour;
+                            var tileX = areaX + (column * tileWidth) + (radius * tileWidth);
+                            var tileY = areaY + (row * tileHeight) + (radius * tileHeight);
+                            ctx.fillRect(tileX, tileY, tileWidth, tileHeight);
+                            ctx.strokeRect(tileX, tileY, tileWidth, tileHeight);
+                        }
+                    }
+                }
+            }
+
+            // Отрисовываем кол-во tiles снаружи для вертикальной линии
+            ctx.font = "30px sans-serif"; 
+            ctx.fillStyle = "white"; 
+            ctx.textAlign = "right"; // Выравнивание
+            ctx.textBaseline = "hanging"; // устанвл. базовую линию, используемую при выводе текста.
+            var mWidth = ctx.measureText("M").width; // ширина заданного текста в пикселях
+            var totalHeightTextY = Math.max(areaY, areaY + areaHeight / 2 - mWidth / 2);
+            ctx.fillText(tilesHigh, areaX - 10, totalHeightTextY);
+
+            // Рисуем линию показывающуюю height комнаты (первая часть отрисовки вертик. линии)
+            ctx.beginPath();
+            ctx.strokeStyle = "white";
+            ctx.moveTo(areaX - 20, areaY);
+            ctx.lineTo(areaX - 20, Math.max(areaY, totalHeightTextY - 10))
+            ctx.stroke();
+
+            // Рисуем линию показывающуюю height комнаты (вторая часть отрисовки вертик. линии)
+            ctx.beginPath(); // начинаем новый контур
+            ctx.strokeStyle = "white";
+            ctx.moveTo(areaX - 20, totalHeightTextY + mWidth + 4); // передвигаем точку контура не рисуя его
+            ctx.lineTo(areaX - 20, areaY + (tilesHigh * tileHeight));
+            ctx.stroke(); // отображаем
+
+
+            ctx.textAlign = "left";
+            var widthTextWidth = ctx.measureText(tilesWide).width;
+            var totalWidthTextX = Math.max(areaX, areaX + areaWidth / 2 - widthTextWidth / 2);
+            ctx.fillText(tilesWide, totalWidthTextX, areaY - mWidth);
+
+            ctx.beginPath();
+            ctx.strokeStyle = "white";
+            ctx.moveTo(areaX, areaY - 20);
+            ctx.lineTo(Math.max(areaX, totalWidthTextX - 10), areaY - 20);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.strokeStyle = "white";
+            ctx.moveTo(totalWidthTextX + widthTextWidth + 10, areaY - 20);
+            ctx.lineTo(areaX + (tilesWide * tileWidth), areaY - 20);
+            ctx.stroke();
+
+            // отрисовака бозначения ширины и высоты помещения внутри
+            if (innerTilesHigh > 0 && innerTilesWide > 0 && isRectangular) {
+                if (innerTilesHigh > 1) {
+
+                    ctx.textAlign = "left";
+                    ctx.textBaseline = "hanging";
+                    var innerHeightTextY = Math.max(areaY + tileHeight * 2, areaY + areaHeight / 2 - mWidth / 2);
+                    ctx.fillText(innerTilesHigh, areaX + tileWidth + 10, innerHeightTextY);
+
+                    ctx.beginPath();
+                    ctx.strokeStyle = "white";
+                    ctx.moveTo(areaX + tileWidth + 20, areaY + tileHeight + 20);
+                    ctx.lineTo(areaX + tileWidth + 20, Math.max(areaY + tileHeight + 20, innerHeightTextY - 10))
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.strokeStyle = "white";
+                    ctx.moveTo(areaX + tileWidth + 20, innerHeightTextY + mWidth + 4);
+                    ctx.lineTo(areaX + tileWidth + 20, areaY + ((tilesHigh - 1) * tileHeight));
+                    ctx.stroke();
+                }
+
+                if (innerTilesWide > 1) {
+                    ctx.textAlign = "left";
+                    var innerWidthTextWidth = ctx.measureText(innerTilesWide).width;
+                    var innerWidthTextX = Math.max(areaX + tileWidth * 2, areaX + areaWidth / 2 - innerWidthTextWidth / 2);
+                    ctx.fillText(innerTilesWide, innerWidthTextX, areaY + tileHeight + 10);
+
+                    ctx.beginPath();
+                    ctx.strokeStyle = "white";
+                    ctx.moveTo(areaX + tileWidth + 20, areaY + tileHeight + 20);
+                    ctx.lineTo(innerWidthTextX - 10, areaY + tileHeight + 20);
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.strokeStyle = "white";
+                    ctx.moveTo(innerWidthTextX + innerWidthTextWidth + 10, areaY + tileHeight + 20);
+                    ctx.lineTo(areaX + tileWidth + (innerTilesWide * tileWidth), areaY + tileHeight + 20);
+                    ctx.stroke();
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

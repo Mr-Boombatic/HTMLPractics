@@ -1,0 +1,55 @@
+header, nav, article, aside, footer {
+	padding: 20px 20px;
+}
+.header-1 {
+	background: rgb(170,187,204);
+	height: 100px;
+	border-bottom: 3px solid navy;
+}
+.container {
+	display: flex;
+}
+article {
+	background: lightsteelblue;
+	flex: 1;
+	order: 2;
+}
+aside {
+	background: lightsteelblue;
+	flex: 1;
+	order: 1;
+}
+section {
+	padding-left: 30px; 
+	border: 1px dotted navy;
+	margin-top: 20px;
+	background-color: LightSlateGray;
+	font-size: 60%;
+	height: inherit;
+}
+nav {
+	background-color: steelblue;
+}
+.header-2 {
+	background: steelblue;
+}
+footer {
+	background: steelblue;
+	height: 30px;
+	margin-top: 20px;
+}
+.link {
+	text-decoration: none;
+	color: black;
+}
+.link:not(:last-child) {
+	padding-right: 2px;
+	border-right: 1px solid navy;
+}
+.link2 {
+	text-decoration: none;
+	color: black;
+}
+p {
+		font-size: 14pt;
+}

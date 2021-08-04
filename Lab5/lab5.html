@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <title>Lab5</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="lab5.css">
+  </head>
+  
+  <body>
+	<header>
+		<script defer src="lab5.js"></script>
+	</header>
+	
+	<div class="content">
+		<div id="err"></div>
+		<form id="form">
+			<fieldset form="reg">
+				<legend>Регистрация</legend>
+				<label>Основная информация: </label>
+				<div class="main">
+					<div><label for="name">Имя: </label><input id="name" name="name" autofocus placeholder="Имя" required></div>
+					<div class="form-control"><label for="email">Email: </label><input id="email" name="email" placeholder="Адрес электронной почты" required><small>msg</small></div>
+					<div><label for="page">Домашняя страница: </label><input id="page" name="page" placeholder="Адрес домашней страницы" required></div>
+					<div><label for="date">Дата: </label><input type="date" id="date" name="date"></div>
+					<div><label for="color">Цвет текста: </label><input type="color" id="color" name="color"></div>
+					<div><label for="range">Размер картинки: </label><input type="range" id="range" name="range" min="1"></div>
+					<div class="form-control"><label for="doc">Документ: </label><input type="text" id="doc" name="doc"><small>msg</small></div>
+				</div>
+				
+				<label>Дополнительная информация: </label>
+				<div class="dop">
+					<div><label for="music">Музыка </label><input type="checkbox" id="music" name="music"></div>
+					<div id="musicDiv" class="music">
+						<div><label for="classic">Классика </label><input class="muschbx" type="checkbox" id="classic" name="classic" disabled></div>
+						<div><label for="jazz">Джаз </label><input class="muschbx" type="checkbox" id="jazz" name="jazz" disabled></div>
+						<div><label for="pop">Поп </label><input class="muschbx" type="checkbox" id="pop" name="pop" disabled></div>
+						<div><label for="rock">Рок </label><input class="muschbx" type="checkbox" id="rock" name="rock" disabled></div>
+						<div><label for="rap">Рэп </label><input class="muschbx" type="checkbox" id="rap" name="rap" disabled></div>
+						<div><label for="another-music">Другое </label><input class="muschbx" type="checkbox" id="another-music" name="another-music" disabled></div>
+					</div>
+				</div>
+
+								
+				<label>Ссылка на лабораторную номер 6: </label>
+				<div class="main">
+					<div><a href="../Lab6/index.html">Lab6</a></div>
+				</div>
+				
+				<button type="submit" name="check">Регистрация</button>
+			</fieldset>
+		</form>
+		
+		<div id="result">
+			<img src="img.png" id="img">
+			Имя: <span id="resName"></span> <br>
+			Email: <span id="resEmail"></span> <br>
+			Домашняя страница: <span id="resPage"></span> <br>
+			Дата: <span id="resDate"></span> <br>
+			Документ: <span id="resDoc"></span> <br>
+			Интересы: <span id="inter"></span> <br>
+			
+		</div>
+	</div>
+	
+	<footer>
+	</footer>
+  </body>

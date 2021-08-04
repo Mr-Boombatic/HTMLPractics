@@ -1,0 +1,40 @@
+header, nav, article, aside, footer {
+	padding: 5px 10px;
+}
+header {
+	background: rgb(170,187,204);
+	height: 150px;
+}
+nav {
+	background-color: steelblue;
+	border-top: 3px solid navy;
+}
+article {
+	background: lightsteelblue;
+}
+aside {
+	background: lightsteelblue;
+}
+footer {
+	background: steelblue;
+	height: 100px;
+}
+.link {
+	text-decoration: none;
+	color: black;
+}
+.link:not(:last-child) {
+	padding-right: 2px;
+	border-right: 1px solid navy;
+}
+.link2 {
+	text-decoration: none;
+	color: black;
+}
+section {
+	padding-left: 30px; 
+	border: 1px dotted navy;
+	margin-top: 20px;
+	background-color: LightSlateGray;
+	font-size: 60%
+}
